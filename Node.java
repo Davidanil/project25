@@ -62,6 +62,7 @@ public class Node {
     	if (_parent != null)
     		System.out.println("Parent: " + _parent.getKind());
     	System.out.println("Level: " + getLvl() + "\nNode: " + getKind());
+        System.out.println("Text: " + _text);
     	System.out.println(_text.contains("_GET"));
     	System.out.println();
     	for (Node item : _children) {

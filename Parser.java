@@ -36,47 +36,50 @@ public class Parser {
 		return temp;
 	}
 	
-	public static Node createTree(String teste) {
+	public static Node createTree(String slice) {
 		Node root = new Node(null);
 		Node current = root;
 		Node parent = root;
-		int ii =0;
-		int iii =0;
+		int strIterator =0;
 		char c = 'a';
 		String temp = "";
 		boolean kind = false;
-		while(iii < teste.length()-1) {
+		
+		while(strIterator < slice.length()-1) {
+
+			//Check if new block is opened
 			if (c == '{') {
 				current.addText(temp);
 				temp = "";
 				current = new Node(current);
-				current.setKind(Integer.toString(ii));
 				parent = current.get_parent();
 				parent.addChild(current);
-				ii++;
 				kind = true;
 			}
 			
+			//Finding kinds value AKA node name
 			if (c == ':' && kind == true) {
 				temp = "";
-				iii = iii+2;
-				while(c != '\"') {
-					c = teste.charAt(iii);
+				strIterator = strIterator+2;
+				while((c = slice.charAt(strIterator)) != '\"') {
 					temp += c;
-					iii++;
+					strIterator++;
 				}
 				kind = false;
-				current.setKind(temp.substring(0, temp.length()-1));
+				current.setKind(temp);
 			}
+
+			//Check if new block is closed
 			if (c == '}') {
 				current.addText(temp);
 				temp = "";
 				current = current.get_parent();
 				parent = parent.get_parent();
 			}
-		c = teste.charAt(iii);
-		temp += c;
-		iii++;
+
+			c = slice.charAt(strIterator);
+			temp += c;
+			strIterator++;
 		}
 		return root;
 	}
