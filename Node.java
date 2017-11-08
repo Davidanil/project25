@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sun.org.apache.bcel.internal.generic.PUTSTATIC;
-
 public class Node {
     private List<Node> _children = new ArrayList<Node>();
     private Node _parent = null;
@@ -10,7 +8,7 @@ public class Node {
     private int _lvl = 0;
     private String _text = "";
     private String _name = "";
-    private boolean _vuln=false;
+    private boolean _vuln = false;
     	
     //Constructor
     public Node(Node parent) {
@@ -88,6 +86,7 @@ public class Node {
 
     }
     
+    //Find name of parameter
     public String findName(String text) {
     	String array[] = text.split("\"");
     	for(int i=0; i<array.length ;i++) {
@@ -98,12 +97,15 @@ public class Node {
 		return "";
     }
     
-    public String parentSearch(Node start, String parent, String child) {
+    //Search tree for specific strings
+    public String parentSearch(Node start, String parent, String child, boolean kind) {
     	if (start.getKind().contains(parent))
 			for(Node n : start.getChildren())
 				if(n.getKind().contains(child)) {
 					n.setName(n.findName(n.getText()));
-					return n.getKind() + "\n" + n.getName();
+					if(kind)
+						return n.getKind() + "\n" + n.getName();
+					return n.getName();
 					}
     	return "";
     }
@@ -112,25 +114,28 @@ public class Node {
     	String ret = "";
     	while (start.get_parent() != null) {
     		start = start.get_parent();
-    		ret = parentSearch(start, "assi", "var");
+    		ret = parentSearch(start, "assi", "var", true);
     		if(!ret.isEmpty())
     			return ret;
-    		ret = parentSearch(start, "cal", "ident");
+    		ret = parentSearch(start, "cal", "ident", true);
     		if(!ret.isEmpty())
     			return ret;
     	}
     	return "Not found";
     }
     
+    //Print Tree
     public void printTree() {
     	addVuln(getText().contains(": \"q\""));
     	addVuln(getText().contains(": \"u\""));
     	addVuln(getText().contains("_GET"));
+    	
     	if (get_parent()!= null)
     		System.out.println("Parent: " + get_parent().getKind());
     	System.out.println("Level: " + getLvl());
     	System.out.println("Node: " + getKind());
     	System.out.println("Vuln: " + getVuln());
+    	
     	if (getVuln())
     		System.out.println(searchTree(this));
     	System.out.println();
@@ -138,5 +143,18 @@ public class Node {
     	    item.printTree();
     	}
     	System.out.println();
+    }
+    
+    public String printTree2() {
+    	addVuln(getText().contains("_query"));
+    	if (getVuln()) {
+    		if(get_parent() != null)
+    		System.out.println(parentSearch(get_parent(), "cal", "var", false));
+    		return parentSearch(get_parent(), "cal", "var", false);
+    	}
+    	for (Node item : getChildren()) {
+    	    item.printTree2();
+    	}
+    	return "";
     }
 }
