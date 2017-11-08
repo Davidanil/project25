@@ -110,6 +110,32 @@
           }
         ]
       }
+    },
+    {
+      "kind": "assign",
+      "operator": "=",
+      "left": {
+        "kind": "variable",
+        "name": "query",
+        "byref": false,
+        "curly": false
+      },
+      "right": {
+        "kind": "call",
+        "what": {
+          "kind": "identifier",
+          "resolution": "uqn",
+          "name": "mysql_query"
+        },
+        "arguments": [
+          {
+            "kind": "variable",
+            "name": "_GET",
+            "byref": false,
+            "curly": false
+          }
+        ]
+      }
     }
   ],
   "errors": []
