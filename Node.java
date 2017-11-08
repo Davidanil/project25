@@ -114,10 +114,7 @@ public class Node {
     	String ret = "";
     	while (start.get_parent() != null) {
     		start = start.get_parent();
-    		ret = parentSearch(start, "assi", "var", true);
-    		if(!ret.isEmpty())
-    			return ret;
-    		ret = parentSearch(start, "cal", "ident", true);
+    		ret = parentSearch(start, "assi", "var", false);
     		if(!ret.isEmpty())
     			return ret;
     	}
@@ -125,36 +122,38 @@ public class Node {
     }
     
     //Print Tree
-    public void printTree() {
+    public String printTree() {
     	addVuln(getText().contains(": \"q\""));
     	addVuln(getText().contains(": \"u\""));
     	addVuln(getText().contains("_GET"));
+    	String ret = "";
     	
-    	if (get_parent()!= null)
-    		System.out.println("Parent: " + get_parent().getKind());
-    	System.out.println("Level: " + getLvl());
-    	System.out.println("Node: " + getKind());
-    	System.out.println("Vuln: " + getVuln());
+    	//if (get_parent()!= null)
+    	//	System.out.println("Parent: " + get_parent().getKind());
+    	//System.out.println("Level: " + getLvl());
+    	//System.out.println("Node: " + getKind());
+    	//System.out.println("Vuln: " + getVuln());
     	
     	if (getVuln())
-    		System.out.println(searchTree(this));
-    	System.out.println();
+    		ret = searchTree(this);//System.out.println(searchTree(this));
+    	//System.out.println();
     	for (Node item : getChildren()) {
-    	    item.printTree();
+    	    ret +=  '\n' + item.printTree();
     	}
-    	System.out.println();
+    	return ret.trim();
+    	//System.out.println();
     }
     
     public String printTree2() {
+    	String ret = "";
     	addVuln(getText().contains("_query"));
     	if (getVuln()) {
     		if(get_parent() != null)
-    		System.out.println(parentSearch(get_parent(), "cal", "var", false));
-    		return parentSearch(get_parent(), "cal", "var", false);
+    			ret = parentSearch(get_parent(), "cal", "var", false);
     	}
     	for (Node item : getChildren()) {
-    	    item.printTree2();
+    	    ret += '\n' + item.printTree2();
     	}
-    	return "";
+    	return ret.trim();
     }
 }
