@@ -7,6 +7,7 @@ public class Node {
     private String _kind = "root";
     private int _lvl = 0;
     private String _text = "";
+    private boolean _vuln=false;
     	
     //Constructor
     public Node(Node parent) {
@@ -15,6 +16,23 @@ public class Node {
     }
     
     //Get Set
+    
+    public boolean getVuln() {
+    	return _vuln;
+    }
+    
+    public void setVuln(boolean vuln) {
+    	_vuln = vuln;
+    }
+    
+    public void addVuln(boolean vuln) {
+    	if (vuln==true) _vuln=vuln;
+    }
+    
+    public String getText() {
+    	return _text;
+    }
+    
     public void setLvl() {
     	if (_parent != null)
     		_lvl = _parent.getLvl() + 1;
@@ -58,15 +76,43 @@ public class Node {
     	return getKind() + getLvl();
 
     }
+    
+    public String parentSearch(Node start, String parent, String child) {
+    	if (start.getKind().contains(parent))
+			for(Node n : start.getChildren())
+				if(n.getKind().contains(child))
+					return n.getKind() + "\n" + n.getText();
+    	return "";
+    }
+    
+    public String searchTree(Node start) {
+    	String ret = "";
+    	while (start.get_parent() != null) {
+    		start = start.get_parent();
+    		ret = parentSearch(start, "assi", "var");
+    		if(!ret.isEmpty())
+    			return ret;
+    		ret = parentSearch(start, "cal", "ident");
+    		if(!ret.isEmpty())
+    			return ret;
+    	}
+    	return "Not found";
+    }
+    
     public void printTree() {
-    	if (_parent != null)
-    		System.out.println("Parent: " + _parent.getKind());
-    	System.out.println("Level: " + getLvl() + "\nNode: " + getKind());
-        System.out.println("Text: " + _text);
-    	System.out.println(_text.contains("_GET"));
+    	addVuln(getText().contains(": \"q\""));
+    	addVuln(getText().contains(": \"u\""));
+    	addVuln(getText().contains("_GET"));
+    	if (get_parent()!= null)
+    		System.out.println("Parent: " + get_parent().getKind());
+    	System.out.println("Level: " + getLvl() + "\nNode: " + getKind() + getText());
+    	System.out.println(getVuln());
+    	if (getVuln())
+    		System.out.println(searchTree(this));
     	System.out.println();
-    	for (Node item : _children) {
+    	for (Node item : getChildren()) {
     	    item.printTree();
     	}
+    	System.out.println();
     }
 }
