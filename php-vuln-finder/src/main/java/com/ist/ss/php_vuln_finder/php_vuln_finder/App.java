@@ -34,8 +34,8 @@ public class App {
 				
 				createTreeNode(program, root.getAsJsonArray("children"));
 
-				//
-				//printTreeNode(program, 1);
+				
+				printTreeNode(program);
 				
 			}
 
@@ -148,13 +148,13 @@ public class App {
 	 * @param node - Node from which you want to build the tree from
 	 * @param lvl
 	 */
-	public static void printTreeNode(Node node, int lvl) {
-		for (int i = 1; i < lvl; i++)
+	public static void printTreeNode(Node node) {
+		for (int i = 0; i < node.getLevel(); i++)
 			System.out.print("\t");
 
 		print(node.getKind());
 		for (Node n : node.getChildren()) {
-			printTreeNode(n, lvl + 1);
+			printTreeNode(n);
 		}
 	}
 	

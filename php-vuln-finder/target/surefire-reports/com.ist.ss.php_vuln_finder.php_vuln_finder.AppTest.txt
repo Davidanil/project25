@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.ist.ss.php_vuln_finder.php_vuln_finder.AppTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 sec
