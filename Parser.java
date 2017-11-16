@@ -35,7 +35,7 @@ public class Parser {
 			
 		return temp;
 	}
-	
+
 	public static Node createTree(String slice) {
 		Node root = new Node(null);
 		Node current = root;

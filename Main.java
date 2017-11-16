@@ -6,11 +6,23 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		//Parser.processPattern(Parser.readFile("src/pattern1.txt"));
-		String slice = Parser.readFile("projectSSoft/slice2.1.txt");
-		String potvuln = Parser.createTree(slice).printTree2();
-		String truevuln = Parser.createTree(slice).printTree();
+		VulnerabilityList  v = new VulnerabilityList();
+		String slice = Parser.readFile("slice2.1.txt");
+		
+		String potvuln = Parser.createTree(slice).printTree2(v);
+		String truevuln = Parser.createTree(slice).printTree(v);
 		System.out.println("Potenciais: \n" + potvuln + "\n True: \n" + truevuln);
+
 		crisscross(potvuln.split("\n"), truevuln.split("\n"));
+
+		for(String s : v.getEntries())
+			System.out.println(s);
+		System.out.println("------");
+		for(String s : v.getSinks())
+			System.out.println(s);
+		System.out.println("------");
+		for(String s : v.getSafe())
+			System.out.println(s);
 	}
 	
 	public static void crisscross(String[] a, String[] b) {

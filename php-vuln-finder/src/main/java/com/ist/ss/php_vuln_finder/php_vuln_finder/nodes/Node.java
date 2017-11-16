@@ -43,19 +43,4 @@ public abstract class Node implements NodeInterface {
 
 	}
 
-	// AUX FUNCTIONS
-
-	// Search tree for specific strings
-	
-	/**
-	 * @param childKind - kind of child we are searching for
-	 * @return Node of first matching child
-	 */
-	public Node getDirectChildByKind(String childKind) {
-		for (Node n : this.getChildren())
-			if (n.getKind().equals(childKind)) 
-				return n;
-			
-		return null;
-	}
 }

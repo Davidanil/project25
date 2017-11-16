@@ -1,0 +1,59 @@
+{
+  "kind": "program",
+  "children": [
+    {
+      "kind": "assign",
+      "operator": "=",
+      "left": {
+        "kind": "variable",
+        "name": "u",
+        "byref": false,
+        "curly": false
+      },
+      "right": {
+        "kind": "offsetlookup",
+        "what": {
+          "kind": "variable",
+          "name": "_GET",
+          "byref": false,
+          "curly": false
+        },
+        "offset": {
+          "kind": "string",
+          "value": "passwd",
+          "isDoubleQuote": true
+        }
+      }
+    },
+    {
+      "kind": "assign",
+      "operator": "=",
+      "left": {
+        "kind": "variable",
+        "name": "v",
+        "byref": false,
+        "curly": false
+      },
+      "right": {
+        "kind": "number",
+        "value": "0"
+      }
+    },
+    {
+      "kind": "assign",
+      "operator": "=",
+      "left": {
+        "kind": "variable",
+        "name": "bazinga",
+        "byref": false,
+        "curly": false
+      },
+      "right": {
+        "kind": "number",
+        "value": "0"
+      }
+    }
+  ],
+  "errors": []
+}
+

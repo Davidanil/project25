@@ -1,5 +1,3 @@
-package com.ist.ss.php_vuln_finder.php_vuln_finder;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,7 +10,7 @@ public class Pattern {
 	private List<String> sanitizationFunctions = new ArrayList<String>();
 	private List<String> sensitiveSinks = new ArrayList<String>();
 
-	private static final String PATH = "pattern.txt";
+	private static final String PATH = "pattern1.txt";
 
 	public String getVulnName() {
 		return vulnName;

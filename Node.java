@@ -98,7 +98,7 @@ public class Node {
     }
     
     //Search tree for specific strings
-    public String parentSearch(Node start, String parent, String child, boolean kind) {
+    public String parentSearch(Node start, String parent, String child, boolean kind, VulnerabilityList v) {
     	if (start.getKind().contains(parent))
 			for(Node n : start.getChildren())
 				if(n.getKind().contains(child)) {
@@ -110,11 +110,11 @@ public class Node {
     	return "";
     }
     
-    public String searchTree(Node start) {
+    public String searchTree(Node start, VulnerabilityList v) {
     	String ret = "";
     	while (start.get_parent() != null) {
     		start = start.get_parent();
-    		ret = parentSearch(start, "assi", "var", false);
+    		ret = parentSearch(start, "assi", "var", false, v);
     		if(!ret.isEmpty())
     			return ret;
     	}
@@ -122,10 +122,13 @@ public class Node {
     }
     
     //Print Tree
-    public String printTree() {
+    public String printTree(VulnerabilityList v) {
+    	for(Pattern pat : Pattern.processPatternFile() )
+    		for(String s : pat.getEntryPoints())
+    			addVuln(getText().contains(s.substring(1)));
     	addVuln(getText().contains(": \"q\""));
     	addVuln(getText().contains(": \"u\""));
-    	addVuln(getText().contains("_GET"));
+    	//addVuln(getText().contains("_GET"));
     	String ret = "";
     	
     	//if (get_parent()!= null)
@@ -134,25 +137,32 @@ public class Node {
     	//System.out.println("Node: " + getKind());
     	//System.out.println("Vuln: " + getVuln());
     	
-    	if (getVuln())
-    		ret = searchTree(this);//System.out.println(searchTree(this));
+    	if (getVuln()){
+    		ret = searchTree(this, v);//System.out.println(searchTree(this));
+    		v.addEntry(ret);
+    	}
     	//System.out.println();
     	for (Node item : getChildren()) {
-    	    ret +=  '\n' + item.printTree();
+    	    ret +=  '\n' + item.printTree(v);
     	}
     	return ret.trim();
     	//System.out.println();
     }
     
-    public String printTree2() {
+    public String printTree2(VulnerabilityList v) {
     	String ret = "";
-    	addVuln(getText().contains("_query"));
+    	//addVuln(getText().contains("_query"));
+    	for(Pattern pat : Pattern.processPatternFile() )
+        	for(String s : pat.getSensitiveSinks())
+        		addVuln(getText().contains(s));
     	if (getVuln()) {
-    		if(get_parent() != null)
-    			ret = parentSearch(get_parent(), "cal", "var", false);
+    		if(get_parent() != null){
+    			ret = parentSearch(get_parent(), "cal", "var", false, v);
+    			v.addSink(ret);
+    		}
     	}
     	for (Node item : getChildren()) {
-    	    ret += '\n' + item.printTree2();
+    	    ret += '\n' + item.printTree2(v);
     	}
     	return ret.trim();
     }
