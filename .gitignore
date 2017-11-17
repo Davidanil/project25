@@ -8,8 +8,6 @@
 
 # Eclipse
 .classpath
-.project
-.settings/
 bin/
 
 # Mac
