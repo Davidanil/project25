@@ -4,15 +4,15 @@
 * Criar classes abstractas menos generalistas que a __Node__, como por exemmplo a __Statement__ e __Expression__. Estas classes estão no readme do php-parser que gera as slices.
 * Criar restantes classes para analisar qual programa php. Estas classes estão no readme do php-parser que gera as slices. A análise básica (vale 75% da parte prática) do nosso projecto pede que sejam criados os nós relacionados com assignments e expressions (function call inclusivé). Condições ou ciclos não são necessários para a análise básica, apenas para a avançada. Faltam as seguintes classes/nós:
    * __ConstRef__ - esta relacionado com strings entre plicas
-   * __Encapsed__ - variaveis dentro de strings
-   * __Number__ - nó terminal para numeros, sejam ints ou floats
-   * ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `Analise Avancada` : __If__
+   * ~~__Encapsed__ - variaveis dentro de strings~~
+   * ~~__Number__ - nó terminal para numeros, sejam ints ou floats~~
+   * ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `Analise Avancada` : __If__
    * ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `Analise Avancada` : __While__
    * ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `Analise Avancada` : __Block__  - para as condicoes e ciclos
    * Outros que não estejam nas slices exemplo...
 * Completar as classes já feitas com os atributos necessários para a análise. Neste momento têm apenas as necessárias para criar a treeNode.
 * Criar [todos os patterns](http://awap.sourceforge.net/support.html) necessários para encontrar todas as vulns em PHP.
-* __Começar a implementar o Algoritmo__, ou seja, começar a detectar valores que estejam incluidos nos nossos patterns.
+* ~~__Começar a implementar o Algoritmo__, ou seja, começar a detectar valores que estejam incluidos nos nossos patterns.~~
 
 ## Estrutura do projecto
 * __App__ - tem o main que chama a função createTreeNode e printTreeNode também elas na classe __App__.
