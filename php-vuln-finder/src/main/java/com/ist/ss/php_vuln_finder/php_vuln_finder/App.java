@@ -4,7 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -17,10 +19,11 @@ import com.ist.ss.php_vuln_finder.php_vuln_finder.nodes.*;
 public class App {
 	private static List<Pattern> patterns;
 
-	private static boolean vulnerable;
+	private static boolean vulnerable = false;
+
 	private static List<String> safeVars = new ArrayList<String>();
-	private static List<String> sanitizationVars = new ArrayList<String>();
-	private static List<String> sinkVars = new ArrayList<String>();
+	private static Map<String,String> sanitizationVars = new HashMap<String,String>();
+	private static List<String> sinkFunctionNames = new ArrayList<String>();
 
 	public static List<Pattern> getPatterns() {
 		return patterns;
@@ -46,20 +49,20 @@ public class App {
 		App.safeVars = safeVars;
 	}
 
-	public static List<String> getSanitizationVars() {
+	public static Map<String, String> getSanitizationVars() {
 		return sanitizationVars;
 	}
 
-	public static void setSanitizationVars(List<String> sanitizationVars) {
+	public static void setSanitizationVars(Map<String, String> sanitizationVars) {
 		App.sanitizationVars = sanitizationVars;
 	}
 
-	public static List<String> getSinkVars() {
-		return sinkVars;
+	public static List<String> getSinkFunctionNames() {
+		return sinkFunctionNames;
 	}
 
-	public static void setSinkVars(List<String> sinkVars) {
-		App.sinkVars = sinkVars;
+	public static void setSinkFunctionNames(List<String> sinkFunctionNames) {
+		App.sinkFunctionNames = sinkFunctionNames;
 	}
 
 	public static void main(String[] args) {
@@ -68,7 +71,7 @@ public class App {
 			patterns = Pattern.processPatternFile();
 			// Pattern.printPatterns(patterns);
 
-			JsonReader reader = new JsonReader(new FileReader("slice1.1.txt"));
+			JsonReader reader = new JsonReader(new FileReader("slices/slice7.json"));
 
 			JsonParser parser = new JsonParser();
 			JsonElement element = parser.parse(reader); // Root Element
@@ -82,8 +85,21 @@ public class App {
 
 				createTreeNode(program, root.getAsJsonArray("children"));
 
-				print(getSafeVars().size() + "");
-
+				print("Vulnerable: " + vulnerable);
+				
+				print("==========================");
+				print("Safe Vars: " + safeVars.size());
+				for(String safeVar : safeVars)
+					print("*" + safeVar);
+				
+				print("==========================");
+				print("Sanitization: " + sanitizationVars.size());
+				print("*" + sanitizationVars.toString());
+				
+				print("==========================");
+				print("Sensitive Sink: " + sinkFunctionNames.size());
+				for(String sinkFunctionName : sinkFunctionNames)
+					print("*" + sinkFunctionName);
 				// printTreeNode(program);
 
 			}
@@ -147,24 +163,21 @@ public class App {
 				childChildrenArray.add(obj.getAsJsonObject("offset"));
 				break;
 			case "string":
-				String value = obj.get("value").getAsString();
-				child = new StringNode(parent, value);
+				String valueString = obj.get("value").getAsString();
+				child = new StringNode(parent, valueString);
+				break;
+			case "number":
+				String valueNumber = obj.get("value").getAsString();
+				child = new NumberNode(parent, valueNumber);
+				break;
+			case "encapsed":
+				child = new EncapsedNode(parent);
+				childChildrenArray = obj.getAsJsonArray("value");
 				break;
 			case "variable":
 				child = new VariableNode(parent);
 				String nameVariable = obj.get("name").getAsString();
 				((VariableNode) child).setName(nameVariable);
-
-				if (isSafeVariable(nameVariable))
-					safeVars.add(nameVariable);
-				else{
-					//check if variable was considered safe
-					String vulnVarName = findVariableName(child);
-					safeVars.remove(vulnVarName);
-				}
-
-				// print("nome variavel:" + findVariableName(child));
-
 				break;
 			}
 
@@ -196,6 +209,31 @@ public class App {
 				} else
 					parent.addChild(child);
 
+				if (child.getKind().equals("variable")) {
+					String childName = ((VariableNode) child).getName();
+					String leftVarName = findVariableName(parent);
+					
+					if ((parent instanceof AssignNode) && ((AssignNode) parent).getLeft().equals(child))
+						safeVars.add(childName);
+					else if(!(parent instanceof AssignNode))
+						fillSaniVarsAndSinkFuncNames(leftVarName, childName, false, parent, null);
+					//left Variable of assign node
+//					if ((parent instanceof AssignNode) && ((AssignNode) parent).getLeft().equals(child))
+//						safeVars.add(childName);
+//					//right Variable of assign node
+//					else{
+//						String leftVarName = findVariableName(parent);
+//						
+//						if (!(isSafeVariable(childName))) {
+//							// check if variable was considered safe
+//							safeVars.remove(leftVarName);
+//						}
+//						fillSaniVarsAndSinkFuncNames(leftVarName, childName, false, parent, null);
+//						
+//						
+//					}
+				}
+
 				/*
 				 * if childChildrenArray is null means child doesnt have
 				 * children. if its not null we do a recursive call to find its
@@ -210,20 +248,107 @@ public class App {
 	public static boolean isSafeVariable(String varName) {
 		for (Pattern pattern : getPatterns())
 			for (String entryPoint : pattern.getEntryPoints())
-				if (varName.contains(entryPoint.substring(1)))
+				if (varName.equals(entryPoint.substring(1)))
 					return false;
 
 		return true;
+	}
+	
+	public static boolean isSanitizationFunction(String funcName) {
+		for (Pattern pattern : getPatterns())
+			for (String sanitizationFunc : pattern.getSanitizationFunctions())
+				if (funcName.equals(sanitizationFunc))
+					return true;
+		return false;
+	}
+	
+	public static boolean isSensitiveSink(String sinkName) {
+		for (Pattern pattern : getPatterns())
+			for (String sensitiveSink : pattern.getSensitiveSinks())
+				if (sinkName.equals(sensitiveSink))
+					return true;
+		return false;
 	}
 
 	public static String findVariableName(Node node) {
 		if (!(node instanceof AssignNode) && node.getParent() != null)
 			return findVariableName(node.getParent());
-		else {
+		else if(node instanceof AssignNode)
 			return ((VariableNode) ((AssignNode) node).getLeft()).getName();
-		}
+		else 
+			return null;
 
 	}
+	
+	public static void fillSaniVarsAndSinkFuncNames(
+			String leftVarName, String rightVarName, boolean flagFunction, Node node, String saniFunc){
+		//print(leftVarName + " : " + node.getKind());
+//				//subir ate encontrar assign com o leftvarname igual ou ate encontrar um call duma sink function
+		if(node instanceof CallNode){
+			String funcName = ((IdentifierNode) ((CallNode) node).getWhat()).getName();
+			
+			//check if sanitization function
+			if(isSanitizationFunction(funcName)){
+				//if a sanitization call is used, that means leftVarName is a composed variable
+				//and should be removed from safeVars list
+				safeVars.remove(leftVarName);
+				
+				//update saniFunc to first sanitization Function found
+				String auxSaniFunction = saniFunc;
+				if(!flagFunction)
+					auxSaniFunction = funcName;
+					
+				if(node.getParent() != null)
+					fillSaniVarsAndSinkFuncNames(leftVarName, rightVarName, true, node.getParent(), auxSaniFunction);
+			}
+			
+			//check if sink function
+			else if(isSensitiveSink(funcName)){
+				//if a sanitization call is used, that means leftVarName is a composed variable
+				//and should be removed from safeVars list
+				safeVars.remove(leftVarName);
+				
+				//if argument was bad and never cleaned, and 1st argument of call
+				if(isVarLeftSide(((CallNode) node).getArguments().get(0), rightVarName) && !safeVars.contains(rightVarName) && !sanitizationVars.containsKey(rightVarName))
+						vulnerable = true;
+				else if(sanitizationVars.containsKey(rightVarName)){
+					//get function that helped clean rightVarName
+					sinkFunctionNames.add(sanitizationVars.get(rightVarName));
+				}
+					
+				return;
+			}
+		}
+		else if (node instanceof AssignNode){
+			if(saniFunc != null && !safeVars.contains(leftVarName))
+				sanitizationVars.put(leftVarName, saniFunc);
+//			else if(saniFunc == null && isSafeVariable(rightVarName))
+//				safeVars.add(leftVarName);
+			else if(saniFunc == null && (!isSafeVariable(rightVarName) || !safeVars.contains(rightVarName) || !sanitizationVars.containsKey(rightVarName)))
+				safeVars.remove(leftVarName);
+			return;
+		}
+		else if(node.getParent() != null)
+			fillSaniVarsAndSinkFuncNames(leftVarName, rightVarName, flagFunction, node.getParent(), saniFunc);
+		
+	}
+	
+	public static boolean isVarLeftSide(Node node, String value){
+		if(node instanceof VariableNode){
+			String varName = ((VariableNode) node).getName();
+			if(varName.equals(value))
+				return true;
+		}
+		
+//		if(node.getChildren().isEmpty())
+//			return false;
+//		
+//		for(Node n : node.getChildren())
+//			return isVarLeftSide(n, value);
+		
+		return false;
+	}
+			
 
 	/**
 	 * @param node
