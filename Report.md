@@ -15,8 +15,10 @@ Há um caso especial nesta função, que permite analisar as vulnerabilidades do
 1. Variáveis que estejam a ser declaradas, isto é, usadas à esquerda de um AssignNode;
 2. Variáveis que representam o seu valor, podendo ser usadas à direita de um AssignNode ou como argumento para alguma função.
 
-Uma variável que esteja a ser inicializada é considerada segura, sendo adicionada à lista safeVars.
-Para uma variável que represente o seu valor, é necessário avaliar a segurança desta variável, feito através da chamada à função fillSaniVarsAndSinkFuncNames.
+Uma variável que esteja a ser inicializada é considerada segura.
+Para uma variável que represente o seu valor, é necessário avaliar a segurança desta variável, feito através da chamada à função fillSaniVarsAndSinkFuncNames. Esta função tem por objectivo subir a àrvore a partir do nó variável até chegar a um de dois pontos terminais:
+1. Ser usada por um CallNode, representando uma função de sanitização, ao qual ajuda a limpar a variável caso esta seja perigosa, ou uma sensitive sink que determina se a variável torna o programa vulnerável ou, caso antes tenha sido usada uma função de sanitização, qual a função que ajudou a limpar a variável. Esta informação será usada para output do programa.
+2. Ser usada por um Assign Node sem nunca ter passado por uma sensitive sink. Caso tenha passado por uma função de sanitização, o nome da variável e da função são guardados. Caso contrário, a variável à esquerda do AssignNode é considerada insegura.
 
 2) The main design options
 3) Output of the tool for a few examples
